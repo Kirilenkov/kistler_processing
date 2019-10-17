@@ -8,8 +8,6 @@ hard_path = 'C:/Users/Kirill/Desktop/kistler/main'
 path_setter(hard_path, message=message)
 # only files less than 500000 bytes:
 files = list(filter(lambda f: os.path.getsize(f) < 500000 and not 'No_outliers' in f, os.listdir(path='.')))
-# бодрее для памяти. после однократного цикла итерирования объект удаляется:
-#files = filter(lambda f: os.path.getsize(f) < 500000, os.listdir(path='.'))
 print('File list: ')
 for i in files:
     print(i)
@@ -108,7 +106,7 @@ for file in files:
 
     df.drop(deletion_key, inplace=True)
     df.drop(columns=['Cue_X', 'Cue_Y', 'exp_X_var', 'exp_Y_var', 'exp_X_avg', 'exp_Y_avg'], inplace=True)
-    with open('No_outliers_alphas_'+str(alpha_avg)+'_'+str(alpha_var)+'_'+file, 'w', encoding='utf-8') as f:
+    with open('No_outliers_alphas_' + str(alpha_avg) + '_' + str(alpha_var) + '_' + file, 'w', encoding='utf-8') as f:
         f.write(df.to_string(header = True, index = False))
 
     df.to_excel(writer, sheet_name=file[:-4], index=False)

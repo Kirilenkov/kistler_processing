@@ -24,7 +24,8 @@ def main(file):
     # Take the mean of the fft amplitude for each band
     band_fft = dict()
     for band in bands:
-        freq_ix = np.where((fft_freq >= bands[band][0]) & (fft_freq <= bands[band][1]))[0]
+        freq_ix = np.where((fft_freq >= bands[band][0])
+                           & (fft_freq <= bands[band][1]))[0]
         band_fft[band] = np.mean(fft_vals[freq_ix])
 
     df = pd.DataFrame(columns=['band', 'value'])

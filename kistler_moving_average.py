@@ -3,8 +3,6 @@ import pandas as pd
 from math import sqrt
 from datetime import datetime as dt
 
-# only files less than MAX_BYTES:
-MAX_BYTES = 950000
 # write results to MS Excel:
 WRITE_EXCEL = True
 msg = 'Введите полный путь к папке с логфайлами стабилоплатформы Kistler: '
@@ -38,8 +36,7 @@ def file_match(file):
                 return False
 
 
-files = list(filter(lambda fl: os.path.getsize(fl) < MAX_BYTES and 'without_outliers' not in fl, os.listdir(path='.')))
-files = list(filter(lambda fl: file_match(fl), files))
+files = list(filter(lambda fl: 'without_outliers' not in fl and file_match(fl), os.listdir(path='.')))
 print('File list: ')
 for i in files:
     print(i)
@@ -97,7 +94,6 @@ def main(file_list):
         df = pd.read_csv(file, names=['Time', 'X', 'Y', 'Cue_X', 'Cue_Y'], sep='\t', skip_blank_lines=True,
                          skiprows=19, error_bad_lines=False, engine='python')
         '''initial values: classic mean & standard deviation'''
-        print(df)
         x_avg = df.mean(axis=0).loc['X']
         y_avg = df.mean(axis=0).loc['Y']
         x_std = df.std(axis=0).loc['X']

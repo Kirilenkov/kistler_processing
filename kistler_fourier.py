@@ -2,38 +2,51 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+from scipy.signal import get_window
 
 path = 'C:/Users/Kirill/Desktop/kistler/main'
 os.chdir(path)
-kis_file = path + '/' + 'without_outliers_alphas_0.01_0.01_Kirill 004.txt'
+kis_file = path + '/' + 'without_outliers_alphas_0.01_0.01_Ksenia_EO_004.txt'
 
 
 def main(file):
-    dataX = np.loadtxt(file, skiprows=1)[:, 1]
+    data = np.loadtxt(file, skiprows=1)[:, 2]
     fs = 1000
 
+    # set time vector
+    m = len(data)
+    t = np.arange(m)
+    w = get_window('hann', m)
+
+
     # Get real amplitudes of FFT (only in positive frequencies)
-    fft_vals = np.absolute(np.fft.rfft(dataX))
+    fft_vals = np.absolute(np.fft.rfft(data * w))
+    # fft_vals = np.absolute(np.fft.rfft(data))
+
 
     # Get frequencies for amplitudes in Hz
-    fft_freq = np.fft.rfftfreq(len(dataX), 1.0/fs)
+    fft_freq = np.fft.rfftfreq(len(data), 1.0/fs)
 
     # Define bands
-    bands = {'0-0.3': (0.0, 0.3), '0.3-1': (0.3, 1.0), '1-7': (1.0, 7.0)}
+    bands = {'0-0.3': (0.01, 0.3), '0.3-1': (0.3, 1.0), '1-7': (1.0, 7.0)}
 
     # Take the mean of the fft amplitude for each band
     band_fft = dict()
     for band in bands:
-        freq_ix = np.where((fft_freq >= bands[band][0])
-                           & (fft_freq <= bands[band][1]))[0]
-        band_fft[band] = np.mean(fft_vals[freq_ix])
+        freq_ix = np.where((fft_freq >= bands[band][0]) & (fft_freq <= bands[band][1]))[0]
+        print("------------------------------------------------------")
+        max_magn_for_band = np.max(fft_vals[freq_ix])
+        band_fft[band] = max_magn_for_band
+        max_peak_ix = np.where(fft_vals == max_magn_for_band)
+        print(fft_freq[max_peak_ix])
 
     df = pd.DataFrame(columns=['band', 'value'])
     df['band'] = bands.keys()
     df['value'] = [band_fft[band] for band in bands]
+    print(df)
     ax = df.plot.bar(x='band', y='value', legend=False)
     ax.set_xlabel("Stab band")
-    ax.set_ylabel("Mean band Amplitude")
+    ax.set_ylabel("Max band Magnitude")
     ax.plot()
     plt.show()
 

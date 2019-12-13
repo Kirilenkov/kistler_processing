@@ -6,23 +6,23 @@ from scipy.signal import get_window
 
 path = 'C:/Users/Kirill/Desktop/kistler/main'
 os.chdir(path)
-kis_file = path + '/' + 'without_outliers_alphas_0.01_0.01_Ksenia_EO_004.txt'
+kis_file = path + '/' + 'without_outliers_alphas_0.01_0.01_Ksenia_EO_001.txt'
 
 
 def main(file):
-    data = np.loadtxt(file, skiprows=1)[:, 2]
+    data = np.loadtxt(file, skiprows=1)[:, 1]
     fs = 1000
-
-    # set time vector
-    m = len(data)
-    t = np.arange(m)
-    w = get_window('hann', m)
-
-
     # Get real amplitudes of FFT (only in positive frequencies)
-    fft_vals = np.absolute(np.fft.rfft(data * w))
-    # fft_vals = np.absolute(np.fft.rfft(data))
-
+    while True:
+        trigger = input('Применить окно Хеннинга? y/n \n').lower()
+        if trigger == 'y':
+            m = len(data)
+            w = get_window('hann', m)
+            fft_vals = np.absolute(np.fft.rfft(data * w))
+            break
+        elif trigger == 'n':
+            fft_vals = np.absolute(np.fft.rfft(data))
+            break
 
     # Get frequencies for amplitudes in Hz
     fft_freq = np.fft.rfftfreq(len(data), 1.0/fs)

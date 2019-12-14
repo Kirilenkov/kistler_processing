@@ -6,11 +6,11 @@ from scipy.signal import get_window
 
 path = 'C:/Users/Kirill/Desktop/kistler/main'
 os.chdir(path)
-kis_file = path + '/' + 'without_outliers_alphas_0.01_0.01_Ksenia_EO_001.txt'
+kis_file = path + '/' + 'without_outliers_alphas_0.01_0.01_Ksenia_EC_002.txt'
 
 
 def main(file):
-    data = np.loadtxt(file, skiprows=1)[:, 1]
+    data = np.loadtxt(file, skiprows=1)[:, 2]
     fs = 1000
     # Get real amplitudes of FFT (only in positive frequencies)
     while True:
@@ -28,7 +28,7 @@ def main(file):
     fft_freq = np.fft.rfftfreq(len(data), 1.0/fs)
 
     # Define bands
-    bands = {'0-0.3': (0.01, 0.3), '0.3-1': (0.3, 1.0), '1-7': (1.0, 7.0)}
+    bands = {'0-0.3': (0.016, 0.3), '0.3-1': (0.3, 1.0), '1-7': (1.0, 7.0)}
 
     # Take the mean of the fft amplitude for each band
     band_fft = dict()

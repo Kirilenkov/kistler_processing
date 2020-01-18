@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import os
 from scipy.signal import get_window
 
+
 default_msg = 'Enter the full path to the folder with the log files: \n'
 
 
@@ -20,7 +21,7 @@ def path_setter(link, message=default_msg, stage=False):
         path_setter(input(message), message=message, stage=True)
 
 
-hard_path = 'C:/Users/Kirill/Desktop/kistler/main'
+hard_path = 'C:/Users/Kirill/Desktop/Stab_records/all/after'
 path_setter(hard_path)
 file_dir_list = [(p, f) for p, d, f in os.walk(os.getcwd())]
 file_list = []
@@ -29,6 +30,7 @@ for p, f in file_dir_list:
         if '.txt' in i:
             file_list.append(p + '\\' + i)
 print(file_list)
+writer = pd.ExcelWriter('../kistler_fourier.xlsx')
 
 
 def core(file, axis):
@@ -60,6 +62,7 @@ def core(file, axis):
     # Take the mean of the fft amplitude for each band
     band_fft = dict()
     freq_ix_list = []
+    max_peak_list = []
     for band in bands:
         freq_ix = np.where((fft_freq >= bands[band][0]) & (fft_freq <= bands[band][1]))[0]
         print("------------------------------------------------------")
@@ -67,9 +70,9 @@ def core(file, axis):
         max_magn_for_band = np.max(fft_vals[freq_ix])
         band_fft[band] = max_magn_for_band
         max_peak_ix = np.where(fft_vals == max_magn_for_band)
-        print(fft_freq[max_peak_ix])
+        max_peak_list.append(fft_freq[max_peak_ix])
 
-    freq_ix_cum = np.concatenate(freq_ix_list)
+    '''freq_ix_cum = np.concatenate(freq_ix_list)
 
     df = pd.DataFrame(columns=['freq', 'magn'])
     df['freq'] = [fft_freq[ix] for ix in freq_ix_cum]
@@ -78,18 +81,31 @@ def core(file, axis):
     ax = df.plot.line(x='freq', y='magn', legend=False)
     ax.set_xlabel("Frequencies [Hz]")
     ax.set_ylabel("Magnitude")
-    ax.set_title('Name: {0:s}, Axis: {1:s}'
-                 .format(file.split('/')[-1], 'X' if axis == 1 else ('Y' if axis == 2 else 'Unknown axis')))
+    f_name = 'Name: {0:s}, Axis: {1:s}'.format(file.split('\\')[-1], 'X' if axis == 1 else ('Y' if axis == 2 else 'Unknown axis'))
+    ax.set_title(f_name)
     ax.xaxis.set_major_locator(plt.MultipleLocator(0.5))
     plt.grid(True)
     ax.plot()
     plt.show()
+    # plt.savefig(f_name, '')'''
+    return max_peak_list
 
 
 def main(files):
+    result_df_list = []
+    col = ''
     for file in files:
-        for i in range(1, 2, 1):
-            core(file, i)
+        for i in range(2, 3, 1):
+            ls = core(file, i)
+            if i == 1:
+                col = 'X'
+            elif i == 2:
+                col = 'Y'
+            line = file.split('\\')[-1]
+            suff = '_processed'
+            result_df_list.append(pd.DataFrame([ls], columns=['0-0.3_' + col + suff, '0.3-1_' + col + suff, '1-7_' + col + suff], index=[line]))
+    pd.concat(result_df_list, axis=0).to_excel(writer, sheet_name='Fourier', index=True)
+    writer.save()
 
 
 if __name__ == '__main__':

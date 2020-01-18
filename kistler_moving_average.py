@@ -4,9 +4,9 @@ from math import sqrt
 from datetime import datetime as dt
 
 # write results to MS Excel:
-WRITE_EXCEL = True
+WRITE_EXCEL = False
 msg = 'Введите полный путь к папке с логфайлами стабилоплатформы Kistler: '
-hard_path = 'C:/Users/Kirill/Desktop/kistler/main'
+hard_path = 'C:/Users/Kirill/Desktop/Stab_records/all'
 
 
 def path_setter(link, message=msg, stage=False):

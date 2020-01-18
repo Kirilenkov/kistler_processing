@@ -15,18 +15,20 @@ for i in range(df.__len__()):
     trigg = int(suff[-1])
     eyes = trigg % 2
     if eyes == 1:
-        suff += '_EO'
-    elif eyes == 0:
         suff += '_EC'
-    clms = [c + '_' + suff for c in snippet.columns]
-    snippet.columns = clms
-    snippet.drop(columns=clms[0], inplace=True)
-    # snippet.reset_index(inplace=True)
+    elif eyes == 0:
+        suff += '_EO'
+    clmns = [c + '_' + suff for c in snippet.columns]
+    snippet.columns = clmns
+    snippet.drop(columns=clmns[0], inplace=True)
     snippet.set_index(pd.Index([0]), inplace=True)
     print(snippet)
     micro_df_list.append(snippet)
     if trigg == 8:
         line = pd.concat(micro_df_list, axis=1, sort=True)
-        print(line)
+        macro_df_list.append(line)
+        table = pd.concat(macro_df_list, axis=0, sort=True)
+        print(table)
         micro_df_list.clear()
+
 

@@ -73,7 +73,8 @@ def main(skip_num):
             micro_df_list.append(snippet)
             name_prev = name
     table = pd.concat(macro_df_list, axis=0, sort=True)
-    print(table)
+    table.to_excel(writer, sheet_name=pref.upper() + 'Energy', index=True)
+    writer.save()
 
 
 if __name__ == '__main__':

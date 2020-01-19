@@ -72,7 +72,7 @@ def core(file, axis):
         max_peak_ix = np.where(fft_vals == max_magn_for_band)
         max_peak_list.append(fft_freq[max_peak_ix])
 
-    '''freq_ix_cum = np.concatenate(freq_ix_list)
+    freq_ix_cum = np.concatenate(freq_ix_list)
 
     df = pd.DataFrame(columns=['freq', 'magn'])
     df['freq'] = [fft_freq[ix] for ix in freq_ix_cum]
@@ -81,13 +81,25 @@ def core(file, axis):
     ax = df.plot.line(x='freq', y='magn', legend=False)
     ax.set_xlabel("Frequencies [Hz]")
     ax.set_ylabel("Magnitude")
-    f_name = 'Name: {0:s}, Axis: {1:s}'.format(file.split('\\')[-1], 'X' if axis == 1 else ('Y' if axis == 2 else 'Unknown axis'))
+
+    inf = file.split('\\')[-1].split(' ')
+    pref = inf[-1][0:3]
+    eyes = int(pref[-1]) % 2
+    if eyes == 1:
+        pref = 'EC_'
+    elif eyes == 0:
+        pref = 'EO_'
+
+    f_name = '{0:s}{1:s}_Axis_{2:s}'.format(pref, file.split('\\')[-1],
+            'X' if axis == 1 else ('Y' if axis == 2 else 'Unknown axis'))
     ax.set_title(f_name)
+
     ax.xaxis.set_major_locator(plt.MultipleLocator(0.5))
     plt.grid(True)
     ax.plot()
-    plt.show()
-    # plt.savefig(f_name, '')'''
+
+    plt.savefig(f_name + '.png')
+    # plt.show()
     return max_peak_list
 
 
@@ -95,7 +107,7 @@ def main(files):
     result_df_list = []
     col = ''
     for file in files:
-        for i in range(2, 3, 1):
+        for i in range(1, 2, 1):
             ls = core(file, i)
             if i == 1:
                 col = 'X'

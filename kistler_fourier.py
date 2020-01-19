@@ -21,7 +21,7 @@ def path_setter(link, message=default_msg, stage=False):
         path_setter(input(message), message=message, stage=True)
 
 
-hard_path = 'C:/Users/Kirill/Desktop/Stab_records/all/after'
+hard_path = 'C:/Users/Kirill/Desktop/Stab_records/all/before'
 path_setter(hard_path)
 file_dir_list = [(p, f) for p, d, f in os.walk(os.getcwd())]
 file_list = []
@@ -34,7 +34,7 @@ writer = pd.ExcelWriter('../kistler_fourier.xlsx')
 
 
 def core(file, axis):
-    data = np.loadtxt(file, skiprows=1)[:, axis]
+    data = np.loadtxt(file, skiprows=19)[:, axis]
     fs = 1000
     # Get real amplitudes of FFT (only in positive frequencies)
     '''
@@ -107,7 +107,7 @@ def main(files):
     result_df_list = []
     col = ''
     for file in files:
-        for i in range(1, 2, 1):
+        for i in range(2, 3, 1):
             ls = core(file, i)
             if i == 1:
                 col = 'X'

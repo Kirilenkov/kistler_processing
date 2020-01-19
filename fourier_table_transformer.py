@@ -7,6 +7,7 @@ os.chdir(hard_path)
 df = pd.read_csv('kistler_fourier.csv', delimiter=';')
 micro_df_list = []
 macro_df_list = []
+table = pd.DataFrame()
 for i in range(df.__len__()):
     snippet = df.loc[[i]]
     inf = df.iloc[i, 0].split(' ')
@@ -22,13 +23,13 @@ for i in range(df.__len__()):
     snippet.columns = clmns
     snippet.drop(columns=clmns[0], inplace=True)
     snippet.set_index(pd.Index([0]), inplace=True)
-    print(snippet)
     micro_df_list.append(snippet)
     if trigg == 8:
         line = pd.concat(micro_df_list, axis=1, sort=True)
+        print(line)
         macro_df_list.append(line)
-        table = pd.concat(macro_df_list, axis=0, sort=True)
-        print(table)
         micro_df_list.clear()
-
-
+table = pd.concat(macro_df_list, axis=0)
+writer = pd.ExcelWriter('kistler_fourier_ultimate.xlsx')
+table.to_excel(writer, sheet_name='Fourier', index=True)
+writer.save()

@@ -22,7 +22,7 @@ for i in range(df.__len__()):
     clmns = [c + '_' + suff for c in snippet.columns]
     snippet.columns = clmns
     snippet.drop(columns=clmns[0], inplace=True)
-    snippet.set_index(pd.Index([0]), inplace=True)
+    snippet.set_index(pd.Index([name]), inplace=True)
     micro_df_list.append(snippet)
     if trigg == 8:
         line = pd.concat(micro_df_list, axis=1, sort=True)

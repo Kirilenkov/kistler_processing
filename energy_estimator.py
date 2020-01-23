@@ -18,7 +18,7 @@ def path_setter(link, message=default_msg, stage=False):
         path_setter(input(message), message=message, stage=True)
 
 
-hard_path = 'C:/Users/Kirill/Desktop/Stab_records/velocity'
+hard_path = 'C:/Users/Kirill/Desktop/Stab_records/velocity/proc'
 path_setter(hard_path)
 file_dir_list = [(p, f) for p, d, f in os.walk(os.getcwd())]
 file_list = []
@@ -78,4 +78,4 @@ def main(skip_num):
 
 
 if __name__ == '__main__':
-    main(19)
+    main(1)

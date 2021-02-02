@@ -1,7 +1,4 @@
-import pandas as pd
-import numpy as np
 import os
-import matplotlib.pyplot as plt
 
 default_msg = 'Enter the full path to the folder with the log files: \n'
 

@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import os
 from scipy.signal import get_window
 
-
 default_msg = 'Enter the full path to the folder with the log files: \n'
 
 
@@ -21,20 +20,22 @@ def path_setter(link, message=default_msg, stage=False):
         path_setter(input(message), message=message, stage=True)
 
 
-hard_path = 'C:/Users/Kirill/Desktop/Stab_records/all/before'
+hard_path = '/Users/kirill/Desktop/pow/raw_snippet'
 path_setter(hard_path)
 file_dir_list = [(p, f) for p, d, f in os.walk(os.getcwd())]
 file_list = []
 for p, f in file_dir_list:
     for i in f:
         if '.txt' in i:
-            file_list.append(p + '\\' + i)
+            file_list.append(p + '/' + i)
 print(file_list)
 writer = pd.ExcelWriter('../kistler_fourier.xlsx')
 
 
 def core(file, axis):
+    print(file)
     data = np.loadtxt(file, skiprows=19)[:, axis]
+    # Sample rate in Hz:
     fs = 1000
     # Get real amplitudes of FFT (only in positive frequencies)
     '''
@@ -63,14 +64,21 @@ def core(file, axis):
     band_fft = dict()
     freq_ix_list = []
     max_peak_list = []
+    result_df_list = []
     for band in bands:
         freq_ix = np.where((fft_freq >= bands[band][0]) & (fft_freq <= bands[band][1]))[0]
-        print("------------------------------------------------------")
+        print(type(freq_ix))
+        print("---------------------------{}---------------------------".format(band))
         freq_ix_list.append(freq_ix)
         max_magn_for_band = np.max(fft_vals[freq_ix])
         band_fft[band] = max_magn_for_band
         max_peak_ix = np.where(fft_vals == max_magn_for_band)
         max_peak_list.append(fft_freq[max_peak_ix])
+        df_res = pd.DataFrame(columns=['freq', 'magn'])
+        df_res['freq'] = [fft_freq[ix] for ix in freq_ix]
+        df_res['magn'] = [fft_vals[ix] for ix in freq_ix]
+        df_res = df_res.transpose()
+        result_df_list.append(df_res)
 
     freq_ix_cum = np.concatenate(freq_ix_list)
 
@@ -82,7 +90,7 @@ def core(file, axis):
     ax.set_xlabel("Frequencies [Hz]")
     ax.set_ylabel("Magnitude")
 
-    inf = file.split('\\')[-1].split(' ')
+    inf = file.split('/')[-1].split(' ')
     pref = inf[-1][0:3]
     eyes = int(pref[-1]) % 2
     if eyes == 1:
@@ -90,7 +98,7 @@ def core(file, axis):
     elif eyes == 0:
         pref = 'EO_'
 
-    f_name = '{0:s}{1:s}_Axis_{2:s}'.format(pref, file.split('\\')[-1],
+    f_name = '{0:s}{1:s}_Axis_{2:s}'.format(pref, file.split('/')[-1],
             'X' if axis == 1 else ('Y' if axis == 2 else 'Unknown axis'))
     ax.set_title(f_name)
 
@@ -98,25 +106,29 @@ def core(file, axis):
     plt.grid(True)
     ax.plot()
 
-    plt.savefig(f_name + '.png')
+    # plt.savefig(f_name + '.png')
     # plt.show()
-    return max_peak_list
+    # result_magnitude_df = pd.concat(result_df_list, axis)
+    return max_peak_list, result_df_list
 
 
 def main(files):
-    result_df_list = []
+    result_df_list_max_peak = []
+    result_df_list_magnitude = []
     col = ''
     for file in files:
-        for i in range(2, 3, 1):
-            ls = core(file, i)
+        for i in range(1, 3, 1):
+            max_peak, magnitude = core(file, i)
             if i == 1:
                 col = 'X'
             elif i == 2:
                 col = 'Y'
-            line = file.split('\\')[-1]
+            line = file.split('/')[-1]
             suff = '_processed'
-            result_df_list.append(pd.DataFrame([ls], columns=['0-0.3_' + col + suff, '0.3-1_' + col + suff, '1-7_' + col + suff], index=[line]))
-    pd.concat(result_df_list, axis=0).to_excel(writer, sheet_name='Fourier', index=True)
+            result_df_list_max_peak.append(pd.DataFrame([max_peak], columns=['0-0.3_' + col + suff, '0.3-1_' + col + suff, '1-7_' + col + suff], index=[line]))
+            result_df_list_magnitude += magnitude
+    pd.concat(result_df_list_max_peak, axis=0).to_excel(writer, sheet_name='Fourier', index=True)
+    pd.concat(result_df_list_magnitude, axis=0).to_excel(writer, sheet_name='Magnitude', index=True)
     writer.save()
 
 

@@ -2,11 +2,12 @@ import os
 import pandas as pd
 from math import sqrt
 from datetime import datetime as dt
+import openpyxl
 
 # write results to MS Excel:
 WRITE_EXCEL = False
 msg = 'Введите полный путь к папке с логфайлами стабилоплатформы Kistler: '
-hard_path = 'C:/Users/Kirill/Desktop/Stab_records/velocity'
+hard_path = '/Users/kirill/Desktop/pow'
 
 
 def path_setter(link, message=msg, stage=False):
@@ -35,12 +36,13 @@ def file_match(file):
             if counter > 25:
                 return False
 
+
 file_dir_list = [(p, f) for p, d, f in os.walk(os.getcwd())]
 file_list = []
 for p, f in file_dir_list:
     for i in f:
         if '.txt' in i:
-            file_list.append(p + '\\' + i)
+            file_list.append(p + '/' + i)
 
 files = list(filter(lambda fl: 'without_outliers' not in fl and file_match(fl), file_list))
 print('File list: ')
@@ -112,7 +114,7 @@ def main(file_list):
         y_counter = 0
 
         deletion_keys = set()
-        file = file.split('\\')[-1]
+        file = file.split('/')[-1]
         print('----------------------------------------\n'
               'Processing {!r} ...'.format(file))
 

@@ -2,12 +2,12 @@ import os
 import pandas as pd
 from math import sqrt
 from datetime import datetime as dt
-import openpyxl
+# import openpyxl
 
 # write results to MS Excel:
 WRITE_EXCEL = False
 msg = 'Введите полный путь к папке с логфайлами стабилоплатформы Kistler: '
-hard_path = '/Users/kirill/Desktop/pow'
+hard_path = '/Users/kirill/Desktop/Data/pow'
 
 
 def path_setter(link, message=msg, stage=False):

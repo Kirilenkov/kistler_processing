@@ -20,7 +20,7 @@ def path_setter(link, message=default_msg, stage=False):
         path_setter(input(message), message=message, stage=True)
 
 
-hard_path = '/Users/kirill/Desktop/pow/raw_snippet'
+hard_path = '/Users/kirill/Desktop/Data/pow/processed'
 path_setter(hard_path)
 file_dir_list = [(p, f) for p, d, f in os.walk(os.getcwd())]
 file_list = []
@@ -34,7 +34,7 @@ writer = pd.ExcelWriter('../kistler_fourier.xlsx')
 
 def core(file, axis):
     print(file)
-    data = np.loadtxt(file, skiprows=19)[:, axis]
+    data = np.loadtxt(file, skiprows=1)[:, axis]
     # Sample rate in Hz:
     fs = 1000
     # Get real amplitudes of FFT (only in positive frequencies)
@@ -55,7 +55,7 @@ def core(file, axis):
     fft_vals = np.absolute(np.fft.rfft(data * w))
 
     # Get frequencies for amplitudes in Hz
-    fft_freq = np.fft.rfftfreq(len(data), 1.0/fs)
+    fft_freq = np.fft.rfftfreq(len(data), 1.0 / fs)
 
     # Define bands
     bands = {'0-0.3': (0.016, 0.3), '0.3-1': (0.3, 1.0), '1-7': (1.0, 7.0)}
@@ -64,21 +64,24 @@ def core(file, axis):
     band_fft = dict()
     freq_ix_list = []
     max_peak_list = []
-    result_df_list = []
+    average_band_list = []
     for band in bands:
         freq_ix = np.where((fft_freq >= bands[band][0]) & (fft_freq <= bands[band][1]))[0]
-        print(type(freq_ix))
         print("---------------------------{}---------------------------".format(band))
         freq_ix_list.append(freq_ix)
         max_magn_for_band = np.max(fft_vals[freq_ix])
         band_fft[band] = max_magn_for_band
         max_peak_ix = np.where(fft_vals == max_magn_for_band)
-        max_peak_list.append(fft_freq[max_peak_ix])
-        df_res = pd.DataFrame(columns=['freq', 'magn'])
-        df_res['freq'] = [fft_freq[ix] for ix in freq_ix]
-        df_res['magn'] = [fft_vals[ix] for ix in freq_ix]
-        df_res = df_res.transpose()
-        result_df_list.append(df_res)
+        max_peak_list.append(float(fft_freq[max_peak_ix]))
+        ave = np.array([fft_vals[ix] for ix in freq_ix]).mean()
+        print(ave)
+        average_band_list.append(float(ave))
+
+        # df_res = pd.DataFrame(columns=['freq', 'magn'])
+        # df_res['freq'] = [fft_freq[ix] for ix in freq_ix]
+        # df_res['magn'] = [fft_vals[ix] for ix in freq_ix]
+        # df_res = df_res.transpose()
+        # result_df_list.append(df_res)
 
     freq_ix_cum = np.concatenate(freq_ix_list)
 
@@ -99,34 +102,48 @@ def core(file, axis):
         pref = 'EO_'
 
     f_name = '{0:s}{1:s}_Axis_{2:s}'.format(pref, file.split('/')[-1],
-            'X' if axis == 1 else ('Y' if axis == 2 else 'Unknown axis'))
+                                            'X' if axis == 1 else ('Y' if axis == 2 else 'Unknown axis'))
     ax.set_title(f_name)
 
     ax.xaxis.set_major_locator(plt.MultipleLocator(0.5))
     plt.grid(True)
     ax.plot()
 
-    # plt.savefig(f_name + '.png')
+    plt.savefig(f_name + '.png')
     # plt.show()
     # result_magnitude_df = pd.concat(result_df_list, axis)
-    return max_peak_list, result_df_list
+    return max_peak_list, average_band_list
 
 
 def main(files):
     result_df_list_max_peak = []
     result_df_list_magnitude = []
-    col = ''
+    axis = ''
     for file in files:
+        df_max_peak_buffer = []
+        df_ave_magnitude_buffer = []
         for i in range(1, 3, 1):
             max_peak, magnitude = core(file, i)
             if i == 1:
-                col = 'X'
+                axis = 'X'
             elif i == 2:
-                col = 'Y'
+                axis = 'Y'
             line = file.split('/')[-1]
             suff = '_processed'
-            result_df_list_max_peak.append(pd.DataFrame([max_peak], columns=['0-0.3_' + col + suff, '0.3-1_' + col + suff, '1-7_' + col + suff], index=[line]))
-            result_df_list_magnitude += magnitude
+            mp = 'max_peak_'
+            df_max_peak_buffer.append(pd.DataFrame([max_peak], columns=[mp + '0-0.3_' + axis + suff,
+                                                                        mp + '0.3-1_' + axis + suff,
+                                                                        mp + '1-7_' + axis + suff],
+                                                   index=[line]))
+            av = 'mean_'
+            df_ave_magnitude_buffer.append(pd.DataFrame([magnitude], columns=[av + '0-0.3_' + axis + suff,
+                                                                              av + '0.3-1_' + axis + suff,
+                                                                              av + '1-7_' + axis + suff],
+                                                        index=[line]))
+            # magnitude.set_index(['sd', 'ytr'])
+            # result_df_list_magnitude += magnitude
+        result_df_list_max_peak.append(pd.concat(df_max_peak_buffer, axis=1))
+        result_df_list_magnitude.append(pd.concat(df_ave_magnitude_buffer, axis=1))
     pd.concat(result_df_list_max_peak, axis=0).to_excel(writer, sheet_name='Fourier', index=True)
     pd.concat(result_df_list_magnitude, axis=0).to_excel(writer, sheet_name='Magnitude', index=True)
     writer.save()
@@ -134,4 +151,3 @@ def main(files):
 
 if __name__ == '__main__':
     main(file_list)
-

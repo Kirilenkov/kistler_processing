@@ -1,10 +1,10 @@
 import pandas as pd
 import os
 
-hard_path = 'C:/Users/Kirill/Desktop'
+hard_path = '/Users/kirill/Desktop'
 os.chdir(hard_path)
 
-df = pd.read_csv('kistler_fourier.csv', delimiter=';')
+df = pd.read_csv('kistler_magnitude_mean.csv', delimiter=';')
 micro_df_list = []
 macro_df_list = []
 table = pd.DataFrame()
@@ -30,6 +30,6 @@ for i in range(df.__len__()):
         macro_df_list.append(line)
         micro_df_list.clear()
 table = pd.concat(macro_df_list, axis=0)
-writer = pd.ExcelWriter('kistler_fourier_ultimate.xlsx')
-table.to_excel(writer, sheet_name='Fourier', index=True)
+writer = pd.ExcelWriter('kistler_fourier_magnitude.xlsx')
+table.to_excel(writer, sheet_name='Mean_magnitude', index=True)
 writer.save()
